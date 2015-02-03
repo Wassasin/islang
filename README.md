@@ -1,0 +1,2 @@
+# islang
+Inductive Scripting Language
