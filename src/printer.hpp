@@ -1,9 +1,8 @@
 #pragma once
 
 #include <ostream>
-#include <boost/variant.hpp>
 
-#include "ast.hpp"
+#include "common/ast.hpp"
 
 class printer
 {

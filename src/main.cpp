@@ -1,4 +1,4 @@
-#include "ast.hpp"
+#include "common/ast.hpp"
 #include "printer.hpp"
 
 int main()

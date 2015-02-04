@@ -3,7 +3,7 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 
-#include "common/source.hpp"
+#include "source.hpp"
 
 namespace ast
 {
