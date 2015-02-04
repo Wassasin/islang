@@ -38,16 +38,6 @@ public:
 			os << ')';
 	}
 
-	result_type operator()(const ast::datadecl_product& rhs, bool /*toplevel*/ = false) const
-	{
-		if(rhs.n)
-		{
-			this->operator ()(rhs.n.get());
-			os << " :: ";
-		}
-		this->operator ()(rhs.t);
-	}
-
 	result_type operator()(const ast::datadecl_coproduct& rhs, bool /*toplevel*/ = false) const
 	{
 		this->operator ()(rhs.constr);

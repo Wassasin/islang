@@ -43,20 +43,7 @@ struct type_expr : node {
 	{}
 };
 
-struct datadecl_product : node {
-	boost::optional<property_name> n;
-	type_expr t;
-
-	datadecl_product(decltype(t) t)
-		: n()
-		, t(t)
-	{}
-
-	datadecl_product(property_name n, decltype(t) t)
-		: n(n)
-		, t(t)
-	{}
-};
+struct datadecl_product : type_expr { using type_expr::type_expr; };
 
 struct datadecl_coproduct : node {
 	constructor constr;
