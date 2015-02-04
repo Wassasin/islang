@@ -1,7 +1,8 @@
 %skeleton "lalr1.cc"
 %require  "3.0"
 %debug 
-%defines 
+%defines
+%locations
 %define api.namespace {islang}
 %define parser_class_name {parser_lr}
 
@@ -23,6 +24,7 @@
     #include <cstdlib>
 
     #include <islang/common/ast.hpp>
+    #include <islang/common/source.hpp>
     #include <islang/parser/scanner.hpp>
     #include <islang/printer.hpp>
 
@@ -31,6 +33,7 @@
     
     #define moveptr(src, dest) { dest = src; src = nullptr; }
     #define clean(ptr) { if(ptr) { delete ptr; ptr = nullptr; } }
+    #define mark(loc, dest) { dest->sp = source_span(loc.begin.line, loc.begin.column, loc.end.line, loc.end.column); }
 }
 
 /* return types */
@@ -78,7 +81,7 @@
 %%
 
 program
-    : decls END { r = new ast::program(*$1); clean($1); }
+    : decls END { r = new ast::program(*$1); clean($1); mark(@$, r); }
     ;
 
 decls
@@ -92,11 +95,11 @@ decl
 
 /* datadecl */
 datadecl
-    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); }
+    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); mark(@$, $$); }
     ;
 
 datadecl_coproduct
-    : constructor type_exprs { $$ = new ast::datadecl_coproduct(*$1, *$2); clean($1); clean($2); }
+    : constructor type_exprs { $$ = new ast::datadecl_coproduct(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
     ;
 
 datadecl_coproducts
@@ -120,22 +123,22 @@ type_exprs
     ;
     
 type_expr
-    : NAME type_exprs { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); }
+    : NAME type_exprs { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
     ;
 
 /* low level elements */
 type_name
-    : NAME { $$ = new ast::type_name(*$1); clean($1); }
+    : NAME { $$ = new ast::type_name(*$1); clean($1); mark(@$, $$); }
     ;
     
 constructor
-    : NAME { $$ = new ast::constructor(*$1); clean($1); }
+    : NAME { $$ = new ast::constructor(*$1); clean($1); mark(@$, $$); }
     ;
 
 %%
 
 
-void islang::parser_lr::error(const std::string& err_message)
+void islang::parser_lr::error(const location&, const std::string& err_message)
 {
    std::cerr << "Error: " << err_message << "\n"; 
 }

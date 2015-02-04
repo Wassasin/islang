@@ -23,7 +23,7 @@ public:
 		, yylval(nullptr)
 	{}
 
-	int yylex(parser_lr::semantic_type *lval)
+	int yylex(parser_lr::semantic_type* lval, parser_lr::location_type*)
 	{
 		yylval = lval;
 		return( yylex() );

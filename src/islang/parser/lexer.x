@@ -14,6 +14,7 @@ typedef islang::parser_lr::token token;
 %option nodefault 
 %option yyclass="islang::scanner"
 %option noyywrap
+%option yylineno
 %option c++
 
 %%
