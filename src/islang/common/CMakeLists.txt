@@ -1,0 +1,1 @@
+set(islang_INCLUDE_DIRS ${islang_INCLUDE_DIRS} PARENT_SCOPE)

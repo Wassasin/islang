@@ -3,9 +3,9 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 
-#include "source.hpp"
+#include <islang/common/source.hpp>
 
-namespace ast
+namespace islang { namespace ast
 {
 
 struct node {
@@ -26,7 +26,6 @@ struct name : node {
 
 struct constructor : name { using name::name; };
 struct type_name : name { using name::name; };
-struct property_name : name { using name::name; };
 
 struct type_expr : node {
 	type_name t;
@@ -43,11 +42,9 @@ struct type_expr : node {
 	{}
 };
 
-struct datadecl_product : type_expr { using type_expr::type_expr; };
-
 struct datadecl_coproduct : node {
 	constructor constr;
-	std::vector<datadecl_product> products;
+	std::vector<type_expr> products;
 
 	datadecl_coproduct(decltype(constr) constr, decltype(products) products)
 		: constr(constr)
@@ -85,15 +82,17 @@ struct typedefdecl : node {
 	{}
 };
 
+typedef boost::variant<
+	datadecl,
+	typedefdecl
+> decl;
+
 struct program : node {
-	std::vector<boost::variant<
-		datadecl,
-		typedefdecl
-	>> decls;
+	std::vector<decl> decls;
 
 	program(decltype(decls) decls)
 		: decls(decls)
 	{}
 };
 
-}
+}}

@@ -2,27 +2,23 @@ cmake_minimum_required(VERSION 2.8)
 
 project(islang)
 
-include_directories("${PROJECT_BINARY_DIR}")
+#include_directories("${PROJECT_BINARY_DIR}")
 
-file(GLOB_RECURSE ISLANG_SOURCES src/*.cpp)
-file(GLOB_RECURSE ISLANG_HEADERS src/*.hpp)
+list(APPEND islang_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/src/")
 
-add_executable(islang
-	${ISLANG_SOURCES}
-	${ISLANG_HEADERS}
-)
 
-add_definitions("-Wall -Wextra -Weffc++ -std=c++11 -pedantic -g -O3")
+add_subdirectory(src/islang)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                      "${PROJECT_SOURCE_DIR}/cmake/modules")
+# set(islang_INCLUDE_DIRS ${islang_INCLUDE_DIRS} PARENT_SCOPE)
 
-find_package(Boost COMPONENTS system program_options regex filesystem REQUIRED)
+# file(GLOB_RECURSE ISLANG_SOURCES src/*.cpp)
+# file(GLOB_RECURSE ISLANG_HEADERS src/*.hpp)
 
-include_directories(${Boost_INCLUDE_DIRS})
-                    
-target_link_libraries(islang
-                      ${Boost_SYSTEM_LIBRARY}
-                      ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                      ${Boost_REGEX_LIBRARY}
-                      ${Boost_FILESYSTEM_LIBRARY})
+# find_package(BISON)
+# find_package(FLEX)
+
+#BISON_TARGET(islang_parser parser/parser.y ${CMAKE_CURRENT_BINARY_DIR}/src/parser/parser.cc)
+# FLEX_TARGET(islang_scanner src/parser/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc)
+#ADD_FLEX_BISON_DEPENDENCY(islang_scanner islang_parser)
+
+# include_directories(${CMAKE_CURRENT_BINARY_DIR})

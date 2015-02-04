@@ -1,8 +1,10 @@
 #pragma once
 
 #include <ostream>
+#include <islang/common/ast.hpp>
 
-#include "common/ast.hpp"
+namespace islang
+{
 
 class printer
 {
@@ -59,7 +61,7 @@ public:
 			this->operator ()(arg);
 		}
 
-		os << " = ";
+		os << " := ";
 
 		{
 			bool first = true;
@@ -100,3 +102,4 @@ public:
 	}
 };
 
+}
