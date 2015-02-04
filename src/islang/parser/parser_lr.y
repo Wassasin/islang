@@ -83,53 +83,53 @@ program
 
 decls
     : /* empty */ { $$ = new std::vector<ast::decl>(); }
-    | decls decl { moveptr($1, $$); $$->emplace_back(std::move(*$2)); clean($1); clean($2); }
+    | decls decl { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
 
 decl
-    : datadecl { $$ = new ast::decl(std::move(*$1)); clean($1); }
+    : datadecl { $$ = new ast::decl(*$1); clean($1); }
     ;
 
 /* datadecl */
 datadecl
-    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts { $$ = new ast::datadecl(std::move(*$2), std::move(*$3), std::move(*$5)); clean($2); clean($3); clean($5); }
+    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); }
     ;
 
 datadecl_coproduct
-    : constructor type_exprs { $$ = new ast::datadecl_coproduct(std::move(*$1), std::move(*$2)); clean($1); clean($2); }
+    : constructor type_exprs { $$ = new ast::datadecl_coproduct(*$1, *$2); clean($1); clean($2); }
     ;
 
 datadecl_coproducts
-    : datadecl_coproducts1 datadecl_coproduct { moveptr($1, $$); $$->emplace_back(std::move(*$2)); clean($1); clean($2); }
+    : datadecl_coproducts1 datadecl_coproduct { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
 
 datadecl_coproducts1
     : /* empty */ { $$ = new std::vector<ast::datadecl_coproduct>(); }
-    | datadecl_coproducts1 datadecl_coproduct BAR { moveptr($1, $$); $$->emplace_back(std::move(*$2)); clean($1); clean($2); }
+    | datadecl_coproducts1 datadecl_coproduct BAR { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
 
 datadecl_arguments
     : /* empty */ { $$ = new std::vector<ast::type_name>(); }
-    | datadecl_arguments type_name { moveptr($1, $$); $$->emplace_back(std::move(*$2)); clean($1); clean($2); }
+    | datadecl_arguments type_name { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
     
 /* type expr */
 type_exprs
     : /* empty */ { $$ = new std::vector<ast::type_expr>(); }
-    | type_exprs type_expr { moveptr($1, $$); $$->emplace_back(std::move(*$2)); clean($1); clean($2); }
+    | type_exprs type_expr { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
     
 type_expr
-    : NAME type_exprs { $$ = new ast::type_expr(std::move(*$1), std::move(*$2)); clean($1); clean($2); }
+    : NAME type_exprs { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); }
     ;
 
 /* low level elements */
 type_name
-    : NAME { $$ = new ast::type_name(std::move(*$1)); clean($1); }
+    : NAME { $$ = new ast::type_name(*$1); clean($1); }
     ;
     
 constructor
-    : NAME { $$ = new ast::constructor(std::move(*$1)); clean($1); }
+    : NAME { $$ = new ast::constructor(*$1); clean($1); }
     ;
 
 %%
