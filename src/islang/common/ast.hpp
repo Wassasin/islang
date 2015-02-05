@@ -90,6 +90,10 @@ typedef boost::variant<
 struct program : node {
 	std::vector<decl> decls;
 
+	program()
+		: decls()
+	{}
+
 	program(decltype(decls) decls)
 		: decls(decls)
 	{}

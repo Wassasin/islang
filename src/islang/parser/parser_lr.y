@@ -3,6 +3,7 @@
 %debug 
 %defines
 %locations
+%define parse.error verbose
 %define api.namespace {islang}
 %define parser_class_name {parser_lr}
 
@@ -11,12 +12,14 @@
 
     namespace islang {
         class scanner;
+        class errorhandler;
     }
     
     using namespace islang;
 }
 
 %parse-param { scanner& s  }
+%parse-param { errorhandler& eh }
 %parse-param { ast::program*& r }
 
 %code{
@@ -26,7 +29,8 @@
     #include <islang/common/ast.hpp>
     #include <islang/common/source.hpp>
     #include <islang/parser/scanner.hpp>
-    #include <islang/printer.hpp>
+    #include <islang/error/errorhandler.hpp>
+    #include <islang/error/parse_error.hpp>
 
     #undef yylex
     #define yylex s.yylex
@@ -58,10 +62,11 @@
 
 /* literals */
 %token              END         0   "end of file"
-%token              KW_DATA
-%token<str>         NAME
-%token              DECLARATION
-%token              BAR
+%token              KW_DATA         "keyword data"
+%token<str>         NAME            "name"
+%token              DECLARATION     "symbol ="
+%token              BAR             "symbol |"
+%token              NEWLINE         "newline"
 
 /* binding of types to non-literals */
 %type<constructor>          constructor
@@ -81,12 +86,16 @@
 %%
 
 program
-    : decls END { r = new ast::program(*$1); clean($1); mark(@$, r); }
+    : nlopt END { r = new ast::program(); mark(@$, r); }
+    | decls nlopt END { r = new ast::program(*$1); clean($1); mark(@$, r); }
     ;
 
+
+
 decls
-    : /* empty */ { $$ = new std::vector<ast::decl>(); }
-    | decls decl { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
+    : decl { $$ = new std::vector<ast::decl>(); $$->emplace_back(*$1); clean($1); }
+    | decls NEWLINE decl { moveptr($1, $$); $$->emplace_back(*$3); clean($1); clean($3); }
+    | decls NEWLINE error { moveptr($1, $$); clean($1); }
     ;
 
 decl
@@ -134,11 +143,21 @@ type_name
 constructor
     : NAME { $$ = new ast::constructor(*$1); clean($1); mark(@$, $$); }
     ;
+    
+nlopt
+    : /* empty */
+    | NEWLINE
+    ;
 
 %%
 
 
-void islang::parser_lr::error(const location&, const std::string& err_message)
+void islang::parser_lr::error(const location& loc, const std::string& err_message)
 {
-   std::cerr << "Error: " << err_message << "\n"; 
+    source_location begin(loc.begin.line, loc.begin.column);
+    source_location end(loc.end.line, loc.end.column);
+
+    
+
+    eh.notify(parse_error(err_message, begin));
 }

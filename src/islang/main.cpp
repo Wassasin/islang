@@ -5,6 +5,7 @@
 #include <islang/printer.hpp>
 
 #include <islang/parser/parser.hpp>
+#include <islang/error/errorhandler.hpp>
 
 int main()
 {
@@ -15,7 +16,11 @@ int main()
 	is << "data days := Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday" << std::endl;
 
 	{
-		std::unique_ptr<ast::program> prog(parser::parse(is));
+		errorhandler eh;
+		std::unique_ptr<ast::program> prog(parser::parse(is, eh));
+
+		if(eh.process())
+			return 1;
 
 		printer p(std::cout);
 		p(*prog);

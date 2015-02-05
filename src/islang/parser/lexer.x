@@ -2,11 +2,9 @@
 #include <string>
 #include <islang/parser/scanner.hpp>
 
-/* typedef to make the returns for the tokens shorter */
 typedef islang::parser_lr::token token;
-
-/* define yyterminate as this instead of NULL */
 #define yyterminate() return(token::END)
+#define YY_USER_ACTION { update_loc(); }
 
 %}
 
@@ -35,7 +33,12 @@ data        {
                 return(token::BAR);
             }
    
-[ \t\n]+	/* eat up whitespace */
+[\n+]       {
+                column = 1;
+                return(token::NEWLINE);
+            }
+   
+[ \t]+      /* eat up whitespace */
 
 .	        {
                 printf("Unrecognized character: %s\n", yytext);
