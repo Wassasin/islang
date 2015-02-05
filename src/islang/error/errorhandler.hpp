@@ -26,7 +26,7 @@ public:
 		auto loc = err.location();
 		ss << termcmd::BOLD;
 		if(loc)
-			ss << "internal buffer:" << loc->line << ':' << loc->column << ": ";
+			ss << "internal buffer:" << loc->begin.line << ':' << loc->begin.column << ": ";
 		else
 			ss << "unknown location: ";
 

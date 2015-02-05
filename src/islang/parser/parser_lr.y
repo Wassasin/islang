@@ -159,5 +159,5 @@ void islang::parser_lr::error(const location& loc, const std::string& err_messag
 
     
 
-    eh.notify(parse_error(err_message, begin));
+    eh.notify(parse_error(err_message, source_span(begin, end)));
 }

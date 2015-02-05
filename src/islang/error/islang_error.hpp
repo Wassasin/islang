@@ -17,7 +17,7 @@ public:
 		NOTICE
 	};
 
-	virtual boost::optional<source_location> location() const
+	virtual boost::optional<source_span> location() const
 	{
 		return boost::none;
 	}

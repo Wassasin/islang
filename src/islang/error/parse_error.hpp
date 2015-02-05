@@ -8,15 +8,15 @@ namespace islang
 class parse_error : public islang_error
 {
 	std::string message;
-	source_location loc;
+	source_span loc;
 
 public:
-	parse_error(std::string message, source_location loc)
+	parse_error(std::string message, source_span loc)
 		: message(message)
 		, loc(loc)
 	{}
 
-	virtual boost::optional<source_location> location() const override
+	virtual boost::optional<source_span> location() const override
 	{
 		return loc;
 	}

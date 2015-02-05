@@ -15,10 +15,15 @@ struct source_location
 
 struct source_span
 {
-	source_location start, end;
+	source_location begin, end;
 	
-	source_span(std::size_t sline, std::size_t scolumn, std::size_t eline, std::size_t ecolumn)
-		: start(sline, scolumn)
+	source_span(source_location begin, source_location end)
+		: begin(begin)
+		, end(end)
+	{}
+
+	source_span(std::size_t bline, std::size_t bcolumn, std::size_t eline, std::size_t ecolumn)
+		: begin(bline, bcolumn)
 		, end(eline, ecolumn)
 	{}
 };
