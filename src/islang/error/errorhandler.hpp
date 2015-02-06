@@ -26,7 +26,7 @@ public:
 		auto loc = err.location();
 		ss << termcmd::BOLD;
 		if(loc)
-			ss << "internal buffer:" << loc->begin.line << ':' << loc->begin.column << ": ";
+			ss << loc->src.name << ':' << loc->span.begin.line << ':' << loc->span.begin.column << ": ";
 		else
 			ss << "unknown location: ";
 
@@ -49,7 +49,8 @@ public:
 		ss << termcmd::RESET;
 		ss << err;
 
-
+		if(loc)
+			ss << *loc;
 	}
 
 	bool should_stop() const
@@ -57,7 +58,7 @@ public:
 		return (error_count > 0);
 	}
 
-	bool process() const
+	bool milestone() const
 	{
 		if(!should_stop())
 			return false;

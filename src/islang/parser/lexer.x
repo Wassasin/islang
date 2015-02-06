@@ -32,15 +32,16 @@ data        {
 \|          {
                 return(token::BAR);
             }
-   
+
 [\n+]       {
+                line++;
                 column = 1;
                 return(token::NEWLINE);
             }
-   
+
 [ \t]+      /* eat up whitespace */
 
-.	        {
-                printf("Unrecognized character: %s\n", yytext);
+.           {
+                return(token::UNKNOWN);
             }
 %%

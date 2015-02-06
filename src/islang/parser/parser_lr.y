@@ -19,6 +19,7 @@
 }
 
 %parse-param { scanner& s  }
+%parse-param { source& src }
 %parse-param { errorhandler& eh }
 %parse-param { ast::program*& r }
 
@@ -52,7 +53,7 @@
     ast::datadecl_coproduct* datadecl_coproduct;
     ast::datadecl* datadecl;
     
-    ast::decl* decl;
+    boost::optional<ast::decl>* decl_opt;
     
     std::vector<ast::type_name>* type_names;
     std::vector<ast::type_expr>* type_exprs;
@@ -67,6 +68,7 @@
 %token              DECLARATION     "symbol ="
 %token              BAR             "symbol |"
 %token              NEWLINE         "newline"
+%token              UNKNOWN         "unrecognized character"
 
 /* binding of types to non-literals */
 %type<constructor>          constructor
@@ -74,7 +76,7 @@
 %type<type_expr>            type_expr
 %type<datadecl_coproduct>   datadecl_coproduct
 %type<datadecl>             datadecl
-%type<decl>                 decl
+%type<decl_opt>             decl
 %type<type_names>           datadecl_arguments
 %type<type_exprs>           type_exprs
 %type<datadecl_coproducts>  datadecl_coproducts datadecl_coproducts1
@@ -90,16 +92,14 @@ program
     | decls nlopt END { r = new ast::program(*$1); clean($1); mark(@$, r); }
     ;
 
-
-
 decls
-    : decl { $$ = new std::vector<ast::decl>(); $$->emplace_back(*$1); clean($1); }
-    | decls NEWLINE decl { moveptr($1, $$); $$->emplace_back(*$3); clean($1); clean($3); }
-    | decls NEWLINE error { moveptr($1, $$); clean($1); }
+    : decl { $$ = new std::vector<ast::decl>(); if(*$1) { $$->emplace_back(**$1); } clean($1); }
+    | decls NEWLINE decl { moveptr($1, $$); if(*$3) { $$->emplace_back(**$3); } clean($1); clean($3); }
     ;
 
 decl
-    : datadecl { $$ = new ast::decl(*$1); clean($1); }
+    : datadecl { $$ = new boost::optional<ast::decl>(*$1); clean($1); }
+    | errors { $$ = new boost::optional<ast::decl>(); yyerrok; }
     ;
 
 /* datadecl */
@@ -149,15 +149,14 @@ nlopt
     | NEWLINE
     ;
 
-%%
+errors
+    : error
+    | errors error
 
+%%
 
 void islang::parser_lr::error(const location& loc, const std::string& err_message)
 {
-    source_location begin(loc.begin.line, loc.begin.column);
-    source_location end(loc.end.line, loc.end.column);
-
-    
-
-    eh.notify(parse_error(err_message, source_span(begin, end)));
+    source_span span(loc.begin.line, loc.begin.column, loc.end.line, loc.end.column);
+    eh.notify(parse_error(err_message, source_location(src, span)));
 }
