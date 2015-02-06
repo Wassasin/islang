@@ -47,9 +47,11 @@
     
     ast::constructor* constructor;
     ast::type_name* type_name;
+    ast::property_name* property_name;
     
     ast::type_expr* type_expr;
     
+    ast::datadecl_product* datadecl_product;
     ast::datadecl_coproduct* datadecl_coproduct;
     ast::datadecl* datadecl;
     
@@ -57,6 +59,7 @@
     
     std::vector<ast::type_name>* type_names;
     std::vector<ast::type_expr>* type_exprs;
+    std::vector<ast::datadecl_product>* datadecl_products;
     std::vector<ast::datadecl_coproduct>* datadecl_coproducts;
     std::vector<ast::decl>* decls;
 }
@@ -65,21 +68,30 @@
 %token              END         0   "end of file"
 %token              KW_DATA         "keyword data"
 %token<str>         NAME            "name"
-%token              DECLARATION     "symbol ="
-%token              BAR             "symbol |"
+%token              DECLARATION     "assignment symbol ="
+%token              BAR             "bar symbol |"
+%token              COLON           "colon symbol :"
+%token              COMMA           "comma ,"
+%token              PARENSL         "left parenthesis ("
+%token              PARENSR         "right parenthesis )"
+%token              BRACEL          "left brace {"
+%token              BRACER          "right brace }"
 %token              NEWLINE         "newline"
 %token              UNKNOWN         "unrecognized character"
 
 /* binding of types to non-literals */
 %type<constructor>          constructor
 %type<type_name>            type_name
-%type<type_expr>            type_expr
+%type<property_name>        property_name
+%type<type_expr>            type_expr type_expr_naked
+%type<datadecl_product>     datadecl_product datadecl_product_named
 %type<datadecl_coproduct>   datadecl_coproduct
 %type<datadecl>             datadecl
 %type<decl_opt>             decl
 %type<type_names>           datadecl_arguments
-%type<type_exprs>           type_exprs
-%type<datadecl_coproducts>  datadecl_coproducts datadecl_coproducts1
+%type<type_exprs>           type_exprs0
+%type<datadecl_products>    datadecl_products0 datadecl_products1 datadecl_products_named_list datadecl_products_named_list0 datadecl_products_named_list1
+%type<datadecl_coproducts>  datadecl_coproducts1 datadecl_coproducts0_followup datadecl_coproducts1_followup
 %type<decls>                decls
 
 /* on error clean up */
@@ -104,20 +116,56 @@ decl
 
 /* datadecl */
 datadecl
-    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); mark(@$, $$); }
+    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts1 { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); mark(@$, $$); }
+    ;
+
+datadecl_product
+    : type_expr { $$ = new ast::datadecl_product(*$1); clean($1); mark(@$, r); }
+    ;
+
+datadecl_product_named
+    : type_expr_naked { $$ = new ast::datadecl_product(*$1); clean($1); mark(@$, r); }
+    | property_name COLON type_expr_naked { $$ = new ast::datadecl_product(*$1, *$3); clean($1); clean($3); mark(@$, r); }
+    ;
+
+datadecl_products0
+    : /* empty */ { $$ = new std::vector<ast::datadecl_product>(); }
+    | datadecl_products1 { moveptr($1, $$); clean($1); }
+    ;
+
+datadecl_products1
+    : datadecl_products0 datadecl_product { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
+    | datadecl_products0 datadecl_products_named_list { moveptr($1, $$); $$->insert($$->end(), $2->begin(), $2->end()); clean($1); clean($2); }
+    ;
+
+datadecl_products_named_list
+    : BRACEL datadecl_products_named_list0 datadecl_product_named BRACER { moveptr($2, $$); $$->emplace_back(*$3); clean($2); clean($3); }
+    ;
+
+datadecl_products_named_list0
+    : /* empty */ { $$ = new std::vector<ast::datadecl_product>(); }
+    | datadecl_products_named_list1 COMMA { moveptr($1, $$); clean($1); }
+    ;
+
+datadecl_products_named_list1
+    : datadecl_products_named_list0 datadecl_product_named { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
 
 datadecl_coproduct
-    : constructor type_exprs { $$ = new ast::datadecl_coproduct(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
-    ;
-
-datadecl_coproducts
-    : datadecl_coproducts1 datadecl_coproduct { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
+    : constructor datadecl_products0 { $$ = new ast::datadecl_coproduct(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
     ;
 
 datadecl_coproducts1
+    : datadecl_coproducts0_followup datadecl_coproduct { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
+    ;
+
+datadecl_coproducts0_followup
     : /* empty */ { $$ = new std::vector<ast::datadecl_coproduct>(); }
-    | datadecl_coproducts1 datadecl_coproduct BAR { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
+    | datadecl_coproducts1_followup { moveptr($1, $$); clean($1); }
+    ;
+
+datadecl_coproducts1_followup
+    : datadecl_coproducts0_followup datadecl_coproduct BAR { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
 
 datadecl_arguments
@@ -126,18 +174,27 @@ datadecl_arguments
     ;
     
 /* type expr */
-type_exprs
-    : /* empty */ { $$ = new std::vector<ast::type_expr>(); }
-    | type_exprs type_expr { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
-    ;
-    
 type_expr
-    : NAME type_exprs { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
+    : NAME { $$ = new ast::type_expr(*$1); clean($1); mark(@$, $$); }
+    | PARENSL type_expr_naked PARENSR { moveptr($2, $$); clean($2); }
+    ;
+
+type_expr_naked
+    : NAME type_exprs0 { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
+    ;
+
+type_exprs0
+    : /* empty */ { $$ = new std::vector<ast::type_expr>(); }
+    | type_exprs0 type_expr { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
 
 /* low level elements */
 type_name
     : NAME { $$ = new ast::type_name(*$1); clean($1); mark(@$, $$); }
+    ;
+
+property_name
+    : NAME { $$ = new ast::property_name(*$1); clean($1); mark(@$, $$); }
     ;
     
 constructor

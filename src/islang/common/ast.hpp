@@ -26,6 +26,7 @@ struct name : node {
 
 struct constructor : name { using name::name; };
 struct type_name : name { using name::name; };
+struct property_name : name {using name::name; };
 
 struct type_expr : node {
 	type_name t;
@@ -42,9 +43,24 @@ struct type_expr : node {
 	{}
 };
 
+struct datadecl_product : node {
+	boost::optional<property_name> name;
+	type_expr e;
+
+	datadecl_product(decltype(e) e)
+		: name()
+		, e(e)
+	{}
+
+	datadecl_product(decltype(name) name, decltype(e) e)
+		: name(name)
+		, e(e)
+	{}
+};
+
 struct datadecl_coproduct : node {
 	constructor constr;
-	std::vector<type_expr> products;
+	std::vector<datadecl_product> products;
 
 	datadecl_coproduct(decltype(constr) constr, decltype(products) products)
 		: constr(constr)

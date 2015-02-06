@@ -39,6 +39,20 @@ public:
 			os << ')';
 	}
 
+	result_type operator()(const ast::datadecl_product& rhs, bool /*toplevel*/ = false) const
+	{
+		if(rhs.name)
+		{
+			os << '{';
+			this->operator ()(rhs.name.get());
+			os << " : ";
+			this->operator ()(rhs.e, true);
+			os << '}';
+		}
+		else
+			this->operator ()(rhs.e);
+	}
+
 	result_type operator()(const ast::datadecl_coproduct& rhs, bool /*toplevel*/ = false) const
 	{
 		this->operator ()(rhs.constr);
@@ -61,7 +75,7 @@ public:
 			this->operator ()(arg);
 		}
 
-		os << " := ";
+		os << " = ";
 
 		{
 			bool first = true;

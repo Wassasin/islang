@@ -15,32 +15,24 @@ typedef islang::parser_lr::token token;
 %option c++
 
 %%
-data        {
-                return(token::KW_DATA);
-            }
-
+data        { return(token::KW_DATA); }
 [a-zA-Z]+   {
                 yylval->str = new std::string(yytext);
                 return(token::NAME);
             }
-
-:=          {
-                return(token::DECLARATION);
-            }
-
-\|          {
-                return(token::BAR);
-            }
-
+=           { return(token::DECLARATION); }
+\|          { return(token::BAR); }
+\:          { return(token::COLON); }
+\,          { return(token::COMMA); }
+\(          { return(token::PARENSL); }
+\)          { return(token::PARENSR); }
+\{          { return(token::BRACEL); }
+\}          { return(token::BRACER); }
 \n          {
                 line++;
                 column = 1;
                 return(token::NEWLINE);
             }
-
 [ \t]+      /* eat up whitespace */
-
-.           {
-                return(token::UNKNOWN);
-            }
+.           { return(token::UNKNOWN); }
 %%

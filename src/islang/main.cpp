@@ -12,10 +12,12 @@ int main()
 	using namespace islang;
 
 	std::ostringstream os;
-	os << "data tree a b := Left a | 321 Right b" << std::endl;
-	os << "data days := Monday data | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday" << std::endl;
-	os << "data maybe a := Nothing | Just a" << std::endl;
-	os << "data point := Single |" << std::endl;
+	os << "data tree a b = Left a | 321 Right b" << std::endl;
+	os << "data days = Monday data | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday" << std::endl;
+	os << std::endl;
+	os << "data maybe a = Nothing | Just a" << std::endl;
+	os << "data point = Single |" << std::endl;
+	os << "data List a = Nil | Cons {x : Int, xs : List a}";
 
 	source s(os.str());
 
