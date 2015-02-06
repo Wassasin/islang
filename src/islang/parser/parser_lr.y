@@ -88,13 +88,13 @@
 %%
 
 program
-    : nlopt END { r = new ast::program(); mark(@$, r); }
-    | decls nlopt END { r = new ast::program(*$1); clean($1); mark(@$, r); }
+    : nlsopt END { r = new ast::program(); mark(@$, r); }
+    | decls nlsopt END { r = new ast::program(*$1); clean($1); mark(@$, r); }
     ;
 
 decls
     : decl { $$ = new std::vector<ast::decl>(); if(*$1) { $$->emplace_back(**$1); } clean($1); }
-    | decls NEWLINE decl { moveptr($1, $$); if(*$3) { $$->emplace_back(**$3); } clean($1); clean($3); }
+    | decls nls decl { moveptr($1, $$); if(*$3) { $$->emplace_back(**$3); } clean($1); clean($3); }
     ;
 
 decl
@@ -144,9 +144,14 @@ constructor
     : NAME { $$ = new ast::constructor(*$1); clean($1); mark(@$, $$); }
     ;
     
-nlopt
+nlsopt
     : /* empty */
-    | NEWLINE
+    | nls
+    ;
+
+nls
+    : NEWLINE
+    | nls NEWLINE
     ;
 
 errors
