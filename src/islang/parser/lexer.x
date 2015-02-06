@@ -16,6 +16,7 @@ typedef islang::parser_lr::token token;
 
 %%
 data        { return(token::KW_DATA); }
+typedef     { return(token::KW_TYPEDEF); }
 [a-zA-Z]+   {
                 yylval->str = new std::string(yytext);
                 return(token::NAME);

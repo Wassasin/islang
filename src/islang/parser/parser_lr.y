@@ -54,6 +54,8 @@
     ast::datadecl_product* datadecl_product;
     ast::datadecl_coproduct* datadecl_coproduct;
     ast::datadecl* datadecl;
+
+    ast::typedefdecl* typedefdecl;
     
     boost::optional<ast::decl>* decl_opt;
     
@@ -67,6 +69,7 @@
 /* literals */
 %token              END         0   "end of file"
 %token              KW_DATA         "keyword data"
+%token              KW_TYPEDEF      "keyword typedef"
 %token<str>         NAME            "name"
 %token              DECLARATION     "assignment symbol ="
 %token              BAR             "bar symbol |"
@@ -87,8 +90,9 @@
 %type<datadecl_product>     datadecl_product datadecl_product_named
 %type<datadecl_coproduct>   datadecl_coproduct
 %type<datadecl>             datadecl
+%type<typedefdecl>          typedefdecl
 %type<decl_opt>             decl
-%type<type_names>           datadecl_arguments
+%type<type_names>           type_names0
 %type<type_exprs>           type_exprs0
 %type<datadecl_products>    datadecl_products0 datadecl_products1 datadecl_products_named_list datadecl_products_named_list0 datadecl_products_named_list1
 %type<datadecl_coproducts>  datadecl_coproducts1 datadecl_coproducts0_followup datadecl_coproducts1_followup
@@ -111,12 +115,18 @@ decls
 
 decl
     : datadecl { $$ = new boost::optional<ast::decl>(*$1); clean($1); }
+    | typedefdecl { $$ = new boost::optional<ast::decl>(*$1); clean($1); }
     | errors { $$ = new boost::optional<ast::decl>(); yyerrok; }
+    ;
+
+/* typedefdecl */
+typedefdecl
+    : KW_TYPEDEF type_name type_names0 DECLARATION type_expr_naked { $$ = new ast::typedefdecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); mark(@$, $$); }
     ;
 
 /* datadecl */
 datadecl
-    : KW_DATA type_name datadecl_arguments DECLARATION datadecl_coproducts1 { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); mark(@$, $$); }
+    : KW_DATA type_name type_names0 DECLARATION datadecl_coproducts1 { $$ = new ast::datadecl(*$2, *$3, *$5); clean($2); clean($3); clean($5); mark(@$, $$); }
     ;
 
 datadecl_product
@@ -167,11 +177,6 @@ datadecl_coproducts0_followup
 datadecl_coproducts1_followup
     : datadecl_coproducts0_followup datadecl_coproduct BAR { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
     ;
-
-datadecl_arguments
-    : /* empty */ { $$ = new std::vector<ast::type_name>(); }
-    | datadecl_arguments type_name { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
-    ;
     
 /* type expr */
 type_expr
@@ -200,7 +205,13 @@ property_name
 constructor
     : NAME { $$ = new ast::constructor(*$1); clean($1); mark(@$, $$); }
     ;
-    
+
+type_names0
+    : /* empty */ { $$ = new std::vector<ast::type_name>(); }
+    | type_names0 type_name { moveptr($1, $$); $$->emplace_back(*$2); clean($1); clean($2); }
+    ;
+
+/* parser administration */
 nlsopt
     : /* empty */
     | nls
