@@ -6,12 +6,12 @@
 namespace islang
 {
 
-ast::program* parser::parse(source& src, errorhandler& eh)
+ast::program* parser::parse(source* src, errorhandler& eh)
 {
 	ast::program* result;
 
 	std::stringstream is;
-	is << *src.buf;
+	is << *src->buf;
 
 	scanner s(is);
 	parser_lr p(s, src, eh, result);

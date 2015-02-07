@@ -9,10 +9,10 @@ namespace islang { namespace ast
 {
 
 struct node {
-	boost::optional<source_span> sp;
+	boost::optional<source_location> src;
 
 	node()
-		: sp()
+		: src()
 	{}
 };
 

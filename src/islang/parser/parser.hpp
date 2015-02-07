@@ -13,7 +13,7 @@ class parser
 public:
 	parser() = delete;
 
-	static ast::program* parse(source& src, errorhandler& eh);
+	static ast::program* parse(source* src, errorhandler& eh);
 };
 
 }

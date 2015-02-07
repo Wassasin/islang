@@ -10,7 +10,7 @@ namespace islang
 class errorhandler
 {
 private:
-	std::stringstream ss;
+	std::ostringstream ss;
 	std::size_t error_count, warning_count, notice_count;
 
 public:
@@ -26,9 +26,9 @@ public:
 		auto loc = err.location();
 		ss << termcmd::BOLD;
 		if(loc)
-			ss << loc->src.name << ':' << loc->span.begin.line << ':' << loc->span.begin.column << ": ";
+			ss << loc->src->name << ':' << loc->span.begin.line << ':' << loc->span.begin.column << ": ";
 		else
-			ss << "unknown location: ";
+			ss << "internal: ";
 
 		switch(err.severity())
 		{
@@ -61,11 +61,11 @@ public:
 	bool milestone() const
 	{
 		if(!should_stop())
-			return false;
+			return true;
 
 		std::cerr << ss.str();
 
-		return true;
+		return false;
 	}
 };
 

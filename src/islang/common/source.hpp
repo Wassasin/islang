@@ -12,18 +12,17 @@ namespace islang
 
 struct source
 {
-	/* Immutable */
+	/* Immutable, noncopyable */
 	const std::unique_ptr<const std::string> buf;
 	const std::string name;
 
-	source(std::string&& buf)
-		: buf(new std::string(std::move(buf)))
-		, name("internal buffer")
+	source(const std::ostringstream& ss, std::string name)
+		: buf(new std::string(ss.str()))
+		, name(name)
 	{}
 
-	source(std::string&& buf, const std::string& name)
-		: buf(new std::string(std::move(buf)))
-		, name(name)
+	source(const std::ostringstream& ss)
+		: source(ss, "internal buffer")
 	{}
 };
 
@@ -54,10 +53,10 @@ struct source_span
 
 struct source_location
 {
-	source& src;
+	source* src;
 	source_span span;
 
-	source_location(source& src, source_span span)
+	source_location(source* src, source_span span)
 		: src(src)
 		, span(span)
 	{}
@@ -65,7 +64,7 @@ struct source_location
 
 inline std::ostream& operator<<(std::ostream& os, const source_location& rhs)
 {
-	std::istringstream is(*rhs.src.buf);
+	std::istringstream is(*rhs.src->buf);
 
 	assert(rhs.span.begin.line == rhs.span.end.line);
 

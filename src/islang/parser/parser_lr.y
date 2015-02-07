@@ -19,7 +19,7 @@
 }
 
 %parse-param { scanner& s  }
-%parse-param { source& src }
+%parse-param { source* src }
 %parse-param { errorhandler& eh }
 %parse-param { ast::program*& r }
 
@@ -38,7 +38,7 @@
     
     #define moveptr(src, dest) { dest = src; src = nullptr; }
     #define clean(ptr) { if(ptr) { delete ptr; ptr = nullptr; } }
-    #define mark(loc, dest) { dest->sp = source_span(loc.begin.line, loc.begin.column, loc.end.line, loc.end.column); }
+    #define mark(loc, dest) { dest->src = source_location(src, source_span(loc.begin.line, loc.begin.column, loc.end.line, loc.end.column)); }
 }
 
 /* return types */
@@ -130,12 +130,12 @@ datadecl
     ;
 
 datadecl_product
-    : type_expr { $$ = new ast::datadecl_product(*$1); clean($1); mark(@$, r); }
+    : type_expr { $$ = new ast::datadecl_product(*$1); clean($1); mark(@$, $$); }
     ;
 
 datadecl_product_named
-    : type_expr_naked { $$ = new ast::datadecl_product(*$1); clean($1); mark(@$, r); }
-    | property_name COLON type_expr_naked { $$ = new ast::datadecl_product(*$1, *$3); clean($1); clean($3); mark(@$, r); }
+    : type_expr_naked { $$ = new ast::datadecl_product(*$1); clean($1); mark(@$, $$); }
+    | property_name COLON type_expr_naked { $$ = new ast::datadecl_product(*$1, *$3); clean($1); clean($3); mark(@$, $$); }
     ;
 
 datadecl_products0
