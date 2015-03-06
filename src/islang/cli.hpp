@@ -12,6 +12,8 @@
 #include <islang/error/errorhandler.hpp>
 #include <islang/common/termcmd.hpp>
 
+#include <islang/semantic_analysis.hpp>
+
 namespace islang
 {
 
@@ -130,6 +132,11 @@ private:
 				std::cerr << termcmd::BOLD << "Managed to produce the following AST:" << termcmd::RESET << std::endl;
 				printer p(std::cout); // TODO: select proper output stream / file
 				p(*prog);
+
+				identifier_repository ir;
+				semantic_analysis::analyse(*prog, ir, eh);
+				if(eh.should_stop())
+					continue;
 			}
 		}
 

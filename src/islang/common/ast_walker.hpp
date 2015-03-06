@@ -17,7 +17,17 @@ protected:
 public:
 	virtual ~ast_walker() {}
 
-	virtual result_type operator()(ast::name& /*rhs*/)
+	virtual result_type operator()(ast::type_name& /*rhs*/)
+	{
+		return zero();
+	}
+
+	virtual result_type operator()(ast::property_name& /*rhs*/)
+	{
+		return zero();
+	}
+
+	virtual result_type operator()(ast::constructor& /*rhs*/)
 	{
 		return zero();
 	}
@@ -25,6 +35,8 @@ public:
 	virtual result_type operator()(ast::type_expr& rhs)
 	{
 		result_type r(zero());
+
+		merge(r, this->operator ()(rhs.t));
 
 		for(auto arg : rhs.args)
 			merge(r, this->operator ()(arg));
@@ -93,6 +105,14 @@ public:
 
 		return r;
 	}
+};
+
+class unit {};
+class ast_unit_walker : public ast_walker<unit>
+{
+protected:
+	virtual result_type zero() { return unit(); }
+	virtual void merge(result_type& /*dest*/, result_type /*rhs*/) {}
 };
 
 }

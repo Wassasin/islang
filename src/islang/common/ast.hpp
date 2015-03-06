@@ -4,6 +4,7 @@
 #include <boost/variant.hpp>
 
 #include <islang/common/source.hpp>
+#include <islang/common/identifier.hpp>
 
 namespace islang { namespace ast
 {
@@ -18,9 +19,11 @@ struct node {
 
 struct name : node {
 	std::string str;
+	boost::optional<identifier_ref> id;
 
 	name(std::string str)
 		: str(str)
+		, id()
 	{}
 };
 
@@ -81,7 +84,7 @@ struct datadecl : node {
 };
 
 struct typedefdecl : node {
-	name n;
+	type_name n;
 	std::vector<type_name> arguments;
 	type_expr t;
 

@@ -38,11 +38,11 @@ public:
 			break;
 		case islang_error::severity_e::WARNING:
 			warning_count++;
-			ss << termcmd::YELLOW << "warning ";
+			ss << termcmd::YELLOW << "warning: ";
 			break;
 		case islang_error::severity_e::NOTICE:
 			notice_count++;
-			ss << termcmd::GREEN << "notice ";
+			ss << termcmd::GREEN << "notice: ";
 			break;
 		}
 

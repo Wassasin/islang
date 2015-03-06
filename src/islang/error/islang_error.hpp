@@ -40,18 +40,7 @@ class generic_message : public islang_error
 	std::string message;
 
 public:
-	generic_message(std::string message)
-		: s(severity_e::ERROR)
-		, message(message)
-	{}
-
-	generic_message(severity_e s, std::string message)
-		: s(s)
-		, src()
-		, message(message)
-	{}
-
-	generic_message(severity_e s, source_location src, std::string message)
+	generic_message(std::string message, boost::optional<source_location> src = boost::none, severity_e s = severity_e::ERROR)
 		: s(s)
 		, src(src)
 		, message(message)
