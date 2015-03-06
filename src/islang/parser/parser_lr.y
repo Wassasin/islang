@@ -180,12 +180,12 @@ datadecl_coproducts1_followup
     
 /* type expr */
 type_expr
-    : NAME { $$ = new ast::type_expr(*$1); clean($1); mark(@$, $$); }
+    : type_name { $$ = new ast::type_expr(*$1); clean($1); mark(@$, $$); }
     | PARENSL type_expr_naked PARENSR { moveptr($2, $$); clean($2); }
     ;
 
 type_expr_naked
-    : NAME type_exprs0 { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
+    : type_name type_exprs0 { $$ = new ast::type_expr(*$1, *$2); clean($1); clean($2); mark(@$, $$); }
     ;
 
 type_exprs0
