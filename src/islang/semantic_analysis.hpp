@@ -166,9 +166,21 @@ private:
 		return zero();
 	}
 
-	result_type operator ()(ast::constructor& rhs)
+	result_type operator ()(ast::property_name& rhs)
 	{
-		insert(create(rhs), "constructor", exprc);
+		insert(create(rhs), "property name", exprc);
+		return zero();
+	}
+
+	result_type operator ()(ast::datadecl_coproduct& rhs)
+	{
+		insert(create(rhs.constr), "constructor", exprc);
+
+		exprc.create_layer();
+		for(ast::datadecl_product prod : rhs.products)
+			this->operator() (prod);
+		exprc.forget_layer();
+
 		return zero();
 	}
 
